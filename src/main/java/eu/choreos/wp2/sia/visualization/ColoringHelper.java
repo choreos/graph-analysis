@@ -18,8 +18,11 @@ public class ColoringHelper implements ActionListener{
 	
 	private VisualizationViewer<Vertex, Edge> vv;
 	private AntiPatternReport antiPatternReport;
+	private ChoreographyVisualizer choreographVisualizer;
 
-	public ColoringHelper(VisualizationViewer<Vertex, Edge> vv, AntiPatternReport antiPatterReport){
+	public ColoringHelper(ChoreographyVisualizer chorVisualizer, 
+			VisualizationViewer<Vertex, Edge> vv, AntiPatternReport antiPatterReport){
+		this.choreographVisualizer = chorVisualizer;
 		this.vv = vv;
 		this.antiPatternReport = antiPatterReport;
 	}
@@ -31,6 +34,8 @@ public class ColoringHelper implements ActionListener{
 		//Paints the vertices
 		Transformer<Vertex,Paint> paintTransformer = new Transformer<Vertex,Paint>() {
 			public Paint transform(Vertex v) {
+				choreographVisualizer.updateVertexInfoPanel(null);
+				
 				if (selected.equals("Hub") && antiPatternReport.getHubsReport().isHub(v)){
 					return Color.cyan;
 				}
@@ -40,7 +45,7 @@ public class ColoringHelper implements ActionListener{
 				else if (selected.equals("Sensitive") && antiPatternReport.getSensitivesReport().isSensitive(v)){
 					return Color.cyan;
 				}
-				return null;
+				return Color.white;
 			}
 		};
 		                		

@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 
+import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -22,6 +23,7 @@ import org.apache.commons.collections15.Transformer;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.decorators.PickableVertexPaintTransformer;
 import eu.choreos.wp2.sia.graph.entity.Edge;
 import eu.choreos.wp2.sia.graph.entity.Vertex;
 import eu.choreos.wp2.sia.graph.util.GraphUtils;
@@ -53,6 +55,7 @@ public class MyMouseMenus {
         	private DirectedGraph<Vertex, Edge> graph;
         	private Vertex v;
         	private VisualizationViewer<Vertex, Edge> vv;
+        	private ChoreographyVisualizer cv;
         	
         	public ChangeImpactAnalysis(){
         		super("Perform ripple effect analysis");
@@ -60,27 +63,40 @@ public class MyMouseMenus {
                     public void actionPerformed(ActionEvent e) {
                     	System.out.println("Performing Change Impact Analysis...");
                     	
+                    	cv.resetColoringBox();
+                    	cv.updateVertexInfoPanel(null);
+                    	
                     	DirectedGraph<Vertex, Edge> transitiveClosure = 
                     			GraphUtils.computeTransitiveClosure(graph);
-                    	
+
                     	final Collection<Vertex> predecessors = 
                     			transitiveClosure.getPredecessors(v);
-                    	
+
+                    	//cleans previous paint vertices
+                    	Transformer<Vertex,Paint> paintTransformer = new Transformer<Vertex,Paint>() {
+                    		public Paint transform(Vertex otherVertex) {
+                    			return Color.WHITE;
+                    		}
+                    	};
+
+                    	vv.getRenderContext().setVertexFillPaintTransformer(paintTransformer);
+                    	vv.updateUI();
+
                     	//Paints the vertices
-                		Transformer<Vertex,Paint> paintTransformer = new Transformer<Vertex,Paint>() {
-                			public Paint transform(Vertex otherVertex) {
-                				if (predecessors.contains(otherVertex)){
-                					return Color.YELLOW;
-                				}
-                				else if(otherVertex.equals(v)){
-                					return Color.GREEN;
-                				}
-                				else{
-                					return Color.WHITE;
-                				}
-                			}
-                		};
-                		                		
+                    	paintTransformer = new Transformer<Vertex,Paint>() {
+                    		public Paint transform(Vertex otherVertex) {
+                    			if (predecessors.contains(otherVertex)){
+                    				return Color.YELLOW;
+                    			}
+                    			else if(otherVertex.equals(v)){
+                    				return Color.GREEN;
+                    			}
+                    			else{                					
+                    				return Color.WHITE;
+                    			}
+                    		}
+                    	};
+
                  		vv.getRenderContext().setVertexFillPaintTransformer(paintTransformer);
                 		vv.updateUI();
                     }
@@ -89,12 +105,14 @@ public class MyMouseMenus {
         	}
         	
 			@Override
-			public void setVertexAndView(DirectedGraph<Vertex, Edge> graph, 
-					Vertex v, VisualizationViewer<Vertex, Edge> vv) {
+			public void setGraph(DirectedGraph<Vertex, Edge> graph, 
+					Vertex v, VisualizationViewer<Vertex, Edge> vv, ChoreographyVisualizer cv) {
 				this.graph = graph;
 				this.v = v;
 				this.vv = vv;
+				this.cv = cv;
 			}
+
         }
     }
     

@@ -2,8 +2,11 @@ package eu.choreos.wp2.sia.analysis.entity.report;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 
 import edu.uci.ics.jung.graph.DirectedGraph;
+import eu.choreos.wp2.sia.graph.algorithms.DegreeCentralityCalculator;
+import eu.choreos.wp2.sia.graph.entity.DegreeCentrality;
 import eu.choreos.wp2.sia.graph.entity.Edge;
 import eu.choreos.wp2.sia.graph.entity.Vertex;
 
@@ -14,9 +17,13 @@ public class AntiPatternReport {
 	private ButterfliesReport butterfliesReport; 
 	private SensitiveReport sensitivesReport;
 	private HubsReport hubsReport;
+
+	private Map<Vertex, DegreeCentrality> degreeCentrality;
 	
 	public AntiPatternReport(DirectedGraph<Vertex, Edge> dependencyGraph){
 		this.dependencyGraph = dependencyGraph;
+		
+		this.degreeCentrality = new DegreeCentralityCalculator().calculateVerticesDegreeCentrality(dependencyGraph); 
 		
 		this.butterfliesReport = new ButterfliesReport(dependencyGraph);
 		this.sensitivesReport = new SensitiveReport(dependencyGraph);
@@ -25,6 +32,14 @@ public class AntiPatternReport {
 
 	public DirectedGraph<Vertex, Edge> getDependencyGraph(){
 		return dependencyGraph;
+	}
+	
+	public Map<Vertex, DegreeCentrality> getDegreeCentrality(){
+		return degreeCentrality;
+	}
+	
+	public DegreeCentrality getDegreeCentrality(Vertex v){
+		return degreeCentrality.get(v);
 	}
 	
 	public ButterfliesReport getButterfliesReport() {

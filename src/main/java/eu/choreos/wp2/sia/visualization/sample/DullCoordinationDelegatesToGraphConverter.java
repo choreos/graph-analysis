@@ -35,6 +35,7 @@ public class DullCoordinationDelegatesToGraphConverter implements
 		Vertex f = new SimpleVertex("f");
 		Vertex g = new SimpleVertex("g");
 		Vertex h = new SimpleVertex("h");
+		Vertex i = new SimpleVertex("i");
 		
 		//Adds the vertexes
 		graph.addVertex(a);
@@ -46,6 +47,7 @@ public class DullCoordinationDelegatesToGraphConverter implements
 		graph.addVertex(f);
 		graph.addVertex(g);
 		graph.addVertex(h);
+		graph.addVertex(i);
 		
 		//Adds the edges
 		graph.addEdge(new SimpleEdge("1"), a, b);
@@ -55,6 +57,7 @@ public class DullCoordinationDelegatesToGraphConverter implements
 		graph.addEdge(new SimpleEdge("5"), d, a);
 		graph.addEdge(new SimpleEdge("6"), e, g);
 		graph.addEdge(new SimpleEdge("7"), h, e);
+		graph.addEdge(new SimpleEdge("8"), i, a);
 
 		return graph;
 	}

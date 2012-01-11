@@ -51,6 +51,9 @@ CoordinationDelegatesToGraphConverter{
 		for(int i=0; i<edges; i++){
 			Vertex from = Vertexes.get(rand.nextInt(vertexes));
 			Vertex to = Vertexes.get(rand.nextInt(vertexes));
+			while (to.equals(from)) {
+				to = Vertexes.get(rand.nextInt(vertexes));
+			}
 			graph.addEdge(new SimpleEdge(i), from, to);
 		}	
 	}

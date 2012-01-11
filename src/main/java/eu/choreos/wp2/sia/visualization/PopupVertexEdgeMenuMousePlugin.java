@@ -19,7 +19,9 @@ import javax.swing.JPopupMenu;
 import edu.uci.ics.jung.algorithms.layout.GraphElementAccessor;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.control.AbstractGraphMousePlugin;
 import edu.uci.ics.jung.visualization.control.AbstractPopupGraphMousePlugin;
+import edu.uci.ics.jung.visualization.control.PickingGraphMousePlugin;
 import edu.uci.ics.jung.visualization.decorators.PickableVertexPaintTransformer;
 import eu.choreos.wp2.sia.graph.entity.Edge;
 import eu.choreos.wp2.sia.graph.entity.Vertex;
@@ -36,11 +38,13 @@ public class PopupVertexEdgeMenuMousePlugin extends AbstractPopupGraphMousePlugi
     
 	private JPopupMenu edgePopup, vertexPopup;
     private DirectedGraph<Vertex, Edge> graph;
+    private ChoreographyVisualizer choreographyVisualizer;
     
     /** Creates a new instance of PopupVertexEdgeMenuMousePlugin */
-    public PopupVertexEdgeMenuMousePlugin(DirectedGraph<Vertex,Edge> graph) {
+    public PopupVertexEdgeMenuMousePlugin(DirectedGraph<Vertex,Edge> graph, ChoreographyVisualizer chorVisualizer) {
     	this(MouseEvent.BUTTON3_MASK);
     	this.graph = graph;
+    	this.choreographyVisualizer = chorVisualizer;
     }
     
     /**
@@ -58,8 +62,7 @@ public class PopupVertexEdgeMenuMousePlugin extends AbstractPopupGraphMousePlugi
      */
     protected void handlePopup(MouseEvent e) {
         
-    	final VisualizationViewer<Vertex, Edge> vv =
-                (VisualizationViewer<Vertex, Edge>)e.getSource();
+    	final VisualizationViewer<Vertex, Edge> vv = (VisualizationViewer<Vertex, Edge>)e.getSource();
         
     	Point2D p = e.getPoint();
         
@@ -69,7 +72,7 @@ public class PopupVertexEdgeMenuMousePlugin extends AbstractPopupGraphMousePlugi
             if(v != null) {
                 System.out.println("Vertex " + v + " was right clicked");
                 vertexPopup = new MyMouseMenus.VertexMenu();
-                updateVertexMenu(graph, v, vv, p);
+                updateVertexMenu(graph, v, vv, p, choreographyVisualizer);
                 vertexPopup.show(vv, e.getX(), e.getY());
             } else {
                 final Edge edge = pickSupport.getEdge(vv.getGraphLayout(), p.getX(), p.getY());
@@ -85,15 +88,27 @@ public class PopupVertexEdgeMenuMousePlugin extends AbstractPopupGraphMousePlugi
     @Override
     public void mouseClicked(MouseEvent e) {
     	super.mouseClicked(e);
-    	
+
     	System.out.println("Mouse clicked");
-    	
-    	final VisualizationViewer<Vertex, Edge> vv =
-                (VisualizationViewer<Vertex, Edge>)e.getSource();
-        
-    	vv.getRenderContext().setVertexFillPaintTransformer(
-    			new PickableVertexPaintTransformer<Vertex>(
-						vv.getPickedVertexState(), Color.white, Color.yellow));
+
+    	Point2D p = e.getPoint();
+
+    	final VisualizationViewer<Vertex, Edge> vv = (VisualizationViewer<Vertex, Edge>)e.getSource();
+
+    	GraphElementAccessor<Vertex, Edge> pickSupport = vv.getPickSupport();
+    	if(pickSupport != null) {
+    		final Vertex v = pickSupport.getVertex(vv.getGraphLayout(), p.getX(), p.getY());
+    		if(v != null) {
+    			System.out.println("Vertex " + v + " was clicked");    	
+    			choreographyVisualizer.resetColoringBox();
+    			choreographyVisualizer.updateVertexInfoPanel(v);
+
+    			vv.getRenderContext().setVertexFillPaintTransformer(
+    					new PickableVertexPaintTransformer<Vertex>(
+    							vv.getPickedVertexState(), Color.white, Color.yellow));
+    		}
+    	}
+
     }
     
     /**
@@ -130,13 +145,13 @@ public class PopupVertexEdgeMenuMousePlugin extends AbstractPopupGraphMousePlugi
     
     //Ugly code
     private void updateVertexMenu(DirectedGraph<Vertex, Edge> graph, 
-    		Vertex v, VisualizationViewer<Vertex, Edge> vv, Point2D point) {
+    		Vertex v, VisualizationViewer<Vertex, Edge> vv, Point2D point, ChoreographyVisualizer cv) {
         
     	if (vertexPopup == null) return;
         Component[] menuComps = vertexPopup.getComponents();
         for (Component comp: menuComps) {
             if (comp instanceof VertexMenuListener) {
-                ((VertexMenuListener)comp).setVertexAndView(graph, v, vv);
+                ((VertexMenuListener)comp).setGraph(graph, v, vv, cv);
             }
         }
     }

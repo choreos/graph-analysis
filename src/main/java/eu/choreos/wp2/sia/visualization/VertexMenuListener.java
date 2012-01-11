@@ -6,7 +6,7 @@ import eu.choreos.wp2.sia.graph.entity.Edge;
 import eu.choreos.wp2.sia.graph.entity.Vertex;
 
 public interface VertexMenuListener {
-	
-    void setVertexAndView(DirectedGraph<Vertex, Edge> graph, 
-    		Vertex v, VisualizationViewer<Vertex, Edge> visView);    
+
+	void setGraph(DirectedGraph<Vertex, Edge> graph, Vertex v,
+			VisualizationViewer<Vertex, Edge> vv, ChoreographyVisualizer cv);    
 }
