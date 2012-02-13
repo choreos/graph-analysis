@@ -201,6 +201,13 @@
 	    <artifactId>commons-math</artifactId>
 	    <version>2.2</version>
     </dependency>    
+	
+	<dependency>
+       <groupId>eu.choreos</groupId>
+       <artifactId>rehearsal</artifactId>
+       <version>0.10</version>
+       <type>jar</type>
+    </dependency>
             
   </dependencies>
 

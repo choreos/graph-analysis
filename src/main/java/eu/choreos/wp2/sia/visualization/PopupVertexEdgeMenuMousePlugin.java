@@ -102,6 +102,7 @@ public class PopupVertexEdgeMenuMousePlugin extends AbstractPopupGraphMousePlugi
     			System.out.println("Vertex " + v + " was clicked");    	
     			choreographyVisualizer.resetColoringBox();
     			choreographyVisualizer.updateVertexInfoPanel(v);
+    			choreographyVisualizer.updateEquivalentServicesPanel(v);
 
     			vv.getRenderContext().setVertexFillPaintTransformer(
     					new PickableVertexPaintTransformer<Vertex>(

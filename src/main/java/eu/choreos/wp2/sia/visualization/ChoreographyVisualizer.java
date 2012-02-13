@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -38,19 +39,23 @@ import edu.uci.ics.jung.visualization.decorators.PickableEdgePaintTransformer;
 import edu.uci.ics.jung.visualization.decorators.PickableVertexPaintTransformer;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
+import eu.choreos.wp2.registry.ServiceDescription;
+import eu.choreos.wp2.registry.ServiceRegistry;
 import eu.choreos.wp2.sia.analysis.JungAnalyzer;
 import eu.choreos.wp2.sia.analysis.converters.CoordinationDelegatesToGraphConverter;
 import eu.choreos.wp2.sia.analysis.entity.report.AntiPattern;
 import eu.choreos.wp2.sia.analysis.entity.report.AntiPatternReport;
 import eu.choreos.wp2.sia.graph.entity.Edge;
+import eu.choreos.wp2.sia.graph.entity.SimpleVertex;
 import eu.choreos.wp2.sia.graph.entity.Vertex;
-import eu.choreos.wp2.sia.visualization.MyMouseMenus.VertexMenu;
 import eu.choreos.wp2.sia.visualization.sample.DullCoordinationDelegatesToGraphConverter;
+import eu.choreos.wp2.sia.visualization.sample.GreetingsCoordinationDelegatesToGraphConverter;
 import eu.choreos.wp2.sia.visualization.sample.RandomizedCoordinationDelegatesToGraphConverter;
 
 public class ChoreographyVisualizer {
 
 	private VisualizationViewer<Vertex, Edge> graphPanel;
+	private JRadioButton greetingsButton;
 	private JRadioButton randomButton;
 	private JRadioButton hardcodedButton;
 	private JFrame frame = new JFrame("Choreography Analyzer");
@@ -61,6 +66,15 @@ public class ChoreographyVisualizer {
 	private int currentGraphType = 1;
 	private JComboBox coloringBox;
 	private VertexInformationPanel vertexInformationPanel;
+	private EquivalentServicesPanel equivalentServicesPanel; 
+
+	public AntiPatternReport getAntiPatterReport() {
+		return antiPatterReport;
+	}
+
+	public void setAntiPatterReport(AntiPatternReport antiPatterReport) {
+		this.antiPatterReport = antiPatterReport;
+	}
 
 	public ChoreographyVisualizer(final AntiPatternReport antiPatternReport){
 		this.antiPatterReport = antiPatternReport;
@@ -113,7 +127,7 @@ public class ChoreographyVisualizer {
 		return frame;
 	}
 
-	private void rebuildGraph(final AntiPatternReport antiPatternReport){
+	public void rebuildGraph(final AntiPatternReport antiPatternReport){
 		if (antiPatternReport != null) this.antiPatterReport = antiPatternReport;
 
 		frame.getContentPane().removeAll();
@@ -137,7 +151,7 @@ public class ChoreographyVisualizer {
 			final AntiPatternReport antiPatternReport, Dimension size) {
 
 		if (size == null){
-			size = new Dimension(700,580);
+			size = new Dimension(1024,768);
 		}
 
 		// Creates the visualization viewer
@@ -288,16 +302,22 @@ public class ChoreographyVisualizer {
 		JPanel infoPanel = new JPanel();
 		Box box = Box.createVerticalBox();
 
+		greetingsButton = new JRadioButton("Greetings Choreography");
+		greetingsButton.setActionCommand("greetings");
+		if (currentGraphType == 1) greetingsButton.setSelected(true);
+		
 		hardcodedButton = new JRadioButton("Hardcoded Example");
 		hardcodedButton.setActionCommand("hardcoded");
-		if (currentGraphType == 1) hardcodedButton.setSelected(true);
-
+		if (currentGraphType == 2) hardcodedButton.setSelected(true);
+		
 		randomButton = new JRadioButton("Random Graph");
 		randomButton.setActionCommand("random");
-		if (currentGraphType == 2) randomButton.setSelected(true);
+		if (currentGraphType == 3) randomButton.setSelected(true);
 
 		//Group the radio buttons.
 		ButtonGroup graphButtonGroup = new ButtonGroup();
+		
+		graphButtonGroup.add(greetingsButton);
 		graphButtonGroup.add(hardcodedButton);
 		graphButtonGroup.add(randomButton);
 
@@ -306,9 +326,27 @@ public class ChoreographyVisualizer {
 
 		graphOKButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				
 				JungAnalyzer analyzer = null;
-				if (randomButton.isSelected()){
+				
+				if (greetingsButton.isSelected()){
+					currentGraphType = 1;
+					CoordinationDelegatesToGraphConverter greetingsConverter =
+							new GreetingsCoordinationDelegatesToGraphConverter();
+
+					analyzer = new JungAnalyzer(null, greetingsConverter);
+				}
+				
+				if (hardcodedButton.isSelected()){
 					currentGraphType = 2;
+					CoordinationDelegatesToGraphConverter dullConverter =
+							new DullCoordinationDelegatesToGraphConverter();
+
+					analyzer = new JungAnalyzer(null, dullConverter);
+				}
+				
+				if (randomButton.isSelected()){
+					currentGraphType = 3;
 					RandomizedCoordinationDelegatesToGraphConverter randomized = 
 							new RandomizedCoordinationDelegatesToGraphConverter();
 
@@ -317,13 +355,7 @@ public class ChoreographyVisualizer {
 
 					analyzer = new JungAnalyzer(null, randomized);
 				}
-				if (hardcodedButton.isSelected()){
-					currentGraphType = 1;
-					CoordinationDelegatesToGraphConverter dullConverter =
-							new DullCoordinationDelegatesToGraphConverter();
-
-					analyzer = new JungAnalyzer(null, dullConverter);
-				}
+				
 
 				AntiPatternReport antiPatternReport = analyzer.findAntiPatterns(null);
 				rebuildGraph(antiPatternReport);
@@ -332,6 +364,7 @@ public class ChoreographyVisualizer {
 
 		//Put the radio buttons in a column in a panel.
 		JPanel radioPanel = new JPanel(new GridLayout(0, 1));
+		radioPanel.add(greetingsButton);
 		radioPanel.add(hardcodedButton);
 		radioPanel.add(randomButton);
 
@@ -356,13 +389,15 @@ public class ChoreographyVisualizer {
 		GraphInformationPanel graphInformationPanel = new GraphInformationPanel(antiPatterReport);
 		
 		vertexInformationPanel = new VertexInformationPanel(antiPatterReport, null);
+		equivalentServicesPanel = new EquivalentServicesPanel(this, null, null);
 		
 		box.add(graphSelectorPanel);
 		box.add(colorSelectorPanel);
 		
 		box.add(graphInformationPanel);
 		box.add(vertexInformationPanel);
-
+		box.add(equivalentServicesPanel);
+		
 		infoPanel.add(box);
 		
 		return infoPanel;
@@ -374,6 +409,29 @@ public class ChoreographyVisualizer {
 		
 		vertexInformationPanel = new VertexInformationPanel(antiPatterReport, v);
 		box.add(vertexInformationPanel);
+		
+		box.repaint();
+		infoPanel.repaint();
+	}
+	
+	public void updateEquivalentServicesPanel(Vertex v){
+		Box box = (Box) infoPanel.getComponent(0);
+		box.remove(equivalentServicesPanel);
+		
+		//TODO:Obtain equivalent services
+		SimpleVertex simpleVertex = (SimpleVertex) v;
+		
+		String URI = (String) simpleVertex.getData();
+		
+		ServiceRegistry serviceRegistry = new ServiceRegistry();		
+		
+		List<ServiceDescription> equivalentServices = 
+				serviceRegistry.findEquivalentServices(URI);		
+		
+		equivalentServicesPanel = new EquivalentServicesPanel(this, v, 
+				equivalentServices);
+		
+		box.add(equivalentServicesPanel);
 		
 		box.repaint();
 		infoPanel.repaint();
@@ -393,13 +451,17 @@ public class ChoreographyVisualizer {
 
 		JungAnalyzer analyzer = new JungAnalyzer(null, randomized);
 		 */	
-		CoordinationDelegatesToGraphConverter dullConverter =
-				new DullCoordinationDelegatesToGraphConverter();
+		CoordinationDelegatesToGraphConverter greetingsConverter =
+				new GreetingsCoordinationDelegatesToGraphConverter();
 
-		JungAnalyzer analyzer = new JungAnalyzer(null, dullConverter);
+		JungAnalyzer analyzer = new JungAnalyzer(null, greetingsConverter);
 		AntiPatternReport antiPatternReport = analyzer.findAntiPatterns(null);
 
 		new ChoreographyVisualizer(antiPatternReport);
+	}
+
+	public void refreshGraph() {
+		this.graphPanel.repaint();
 	}
 
 }
