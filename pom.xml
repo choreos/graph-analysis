@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>eu.choreos</groupId>
-  <artifactId>CGA</artifactId>
+  <artifactId>SIA</artifactId>
   <packaging>jar</packaging>
-  <version>0.3</version>
-  <name>CHOReOS Graph Analysis</name>
+  <version>0.4</version>
+  <name>Service Interdependence Analyzer</name>
 
   <scm>
     <connection>scm:git@github.com:choreos/graph-analysis.git</connection>
