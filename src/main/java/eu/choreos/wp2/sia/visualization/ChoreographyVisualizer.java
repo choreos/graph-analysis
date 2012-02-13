@@ -302,7 +302,7 @@ public class ChoreographyVisualizer {
 		JPanel infoPanel = new JPanel();
 		Box box = Box.createVerticalBox();
 
-		greetingsButton = new JRadioButton("Greetings Choreography");
+		greetingsButton = new JRadioButton("Greetings Orchestration");
 		greetingsButton.setActionCommand("greetings");
 		if (currentGraphType == 1) greetingsButton.setSelected(true);
 		
