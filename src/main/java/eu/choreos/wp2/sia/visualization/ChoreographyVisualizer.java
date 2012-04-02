@@ -48,6 +48,7 @@ import eu.choreos.wp2.sia.analysis.entity.report.AntiPatternReport;
 import eu.choreos.wp2.sia.graph.entity.Edge;
 import eu.choreos.wp2.sia.graph.entity.SimpleVertex;
 import eu.choreos.wp2.sia.graph.entity.Vertex;
+import eu.choreos.wp2.sia.visualization.sample.CSVDependencyMatrixToGraphConverter;
 import eu.choreos.wp2.sia.visualization.sample.DullCoordinationDelegatesToGraphConverter;
 import eu.choreos.wp2.sia.visualization.sample.GreetingsCoordinationDelegatesToGraphConverter;
 import eu.choreos.wp2.sia.visualization.sample.RandomizedCoordinationDelegatesToGraphConverter;
@@ -57,6 +58,7 @@ public class ChoreographyVisualizer {
 	private VisualizationViewer<Vertex, Edge> graphPanel;
 	private JRadioButton greetingsButton;
 	private JRadioButton randomButton;
+	private JRadioButton csvButton;
 	private JRadioButton hardcodedButton;
 	private JFrame frame = new JFrame("Choreography Analyzer");
 	private JMenuBar jMenuBar;
@@ -313,6 +315,10 @@ public class ChoreographyVisualizer {
 		randomButton = new JRadioButton("Random Graph");
 		randomButton.setActionCommand("random");
 		if (currentGraphType == 3) randomButton.setSelected(true);
+		
+		csvButton = new JRadioButton("Load CSV");
+		csvButton.setActionCommand("csvmatrix");
+		if (currentGraphType == 4) csvButton.setSelected(true);
 
 		//Group the radio buttons.
 		ButtonGroup graphButtonGroup = new ButtonGroup();
@@ -320,6 +326,7 @@ public class ChoreographyVisualizer {
 		graphButtonGroup.add(greetingsButton);
 		graphButtonGroup.add(hardcodedButton);
 		graphButtonGroup.add(randomButton);
+		graphButtonGroup.add(csvButton);
 
 		JButton graphOKButton = new JButton("OK");
 		graphOKButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -356,6 +363,23 @@ public class ChoreographyVisualizer {
 					analyzer = new JungAnalyzer(null, randomized);
 				}
 				
+				if (csvButton.isSelected()){
+					CoordinationDelegatesToGraphConverter converter;
+					CSVDependencyMatrixToGraphConverter csvConverter = new CSVDependencyMatrixToGraphConverter(frame);
+					
+					if ( csvConverter.isSelected() ){
+						currentGraphType = 4;
+						converter = csvConverter;
+					} else {
+						currentGraphType = 2;
+						csvButton.setSelected(false);
+						hardcodedButton.setSelected(true);
+						converter = new DullCoordinationDelegatesToGraphConverter();
+					}
+					
+					analyzer = new JungAnalyzer(null, converter);
+				}
+				
 
 				AntiPatternReport antiPatternReport = analyzer.findAntiPatterns(null);
 				rebuildGraph(antiPatternReport);
@@ -367,6 +391,7 @@ public class ChoreographyVisualizer {
 		radioPanel.add(greetingsButton);
 		radioPanel.add(hardcodedButton);
 		radioPanel.add(randomButton);
+		radioPanel.add(csvButton);
 
 		JPanel graphSelectorPanel = new JPanel();
 		graphSelectorPanel.setBorder(BorderFactory.createTitledBorder("Graph"));
